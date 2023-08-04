@@ -1,0 +1,45 @@
+[env]
+RUST_BACKTRACE = "full"
+
+[tasks.clean]
+description = "Clean target directory"
+command = "cargo"
+args = ["clean"]
+
+[tasks.build]
+description = "Run cargo build"
+command = "cargo"
+args = ["build", "--workspace"]
+
+[tasks.fmt]
+condition = { channels = ["nightly"] }
+description = "Check whether rust code is properly formatted or not"
+command = "cargo"
+args = ["fmt", "--", "--check"]
+
+[tasks.clippy]
+args = ["clippy", "--workspace", "--", "-D", "warnings"]
+condition = { channels = ["nightly"] }
+description = "Check if clippy return any warnings or error"
+command = "cargo"
+
+[tasks.test]
+description = "Run test"
+command = "cargo"
+args = ["test", "--workspace"]
+
+[tasks.doc]
+description = "Run doc"
+command = "cargo"
+args = ["doc", "--workspace", "--no-deps"]
+
+[tasks.rustdoc]
+description = "Run rustdoc"
+command = "cargo"
+args = ["rustdoc", "--", "--cfg", "docsrs"]
+
+[tasks.local]
+dependencies = ["fmt", "build", "clippy", "doc", "test"]
+
+[tasks.full]
+dependencies = ["clean", "local"]
