@@ -8,7 +8,18 @@
 
 use async_session::{Session, SessionStore};
 use deadpool_redis::redis::AsyncCommands;
-use deadpool_redis::{Connection, Pool, PoolError};
+use deadpool_redis::{Config, Connection, ConnectionInfo, Pool, PoolError};
+
+/// Error enum
+#[derive(thiserror::Error, Debug)]
+pub enum Error {
+    /// dead pool redis build error
+    #[error(transparent)]
+    DeadpoolBuild(#[from] deadpool_redis::BuildError),
+    /// dead pool redis config error
+    #[error(transparent)]
+    DeadPoolConfig(#[from] deadpool_redis::ConfigError),
+}
 
 /// Struct for deadpool pool store
 #[derive(Clone)]
@@ -44,9 +55,38 @@ impl RedisSessionStore {
         }
     }
 
-    /// Set prefix of pool
+    /// Create new deadpool store from url
+    ///
+    /// # Errors
+    /// When session store cannot be created from given url
+    pub fn from_url(url: impl Into<String>) -> Result<Self, Error> {
+        let pool = Config::from_url(url).builder()?.build()?;
+        Ok(Self { pool, prefix: None })
+    }
+
+    /// Create new deadpool store from connection info
+    ///
+    /// # Errors
+    /// When session store cannot be created from given connection info
+    pub fn from_connection_info(connection_info: impl Into<ConnectionInfo>) -> Result<Self, Error> {
+        let pool = Config::from_connection_info(connection_info)
+            .builder()?
+            .build()?;
+        Ok(Self { pool, prefix: None })
+    }
+
+    /// Set prefix of pool takes session store by taking mutable access of
+    /// session store
     pub fn set_prefix(&mut self, prefix: impl Into<String>) {
         self.prefix = Some(prefix.into());
+    }
+
+    /// Set prefix of pool consume redis session store and return new session
+    /// store
+    #[must_use]
+    pub fn with_prefix(mut self, prefix: impl Into<String>) -> Self {
+        self.set_prefix(prefix);
+        self
     }
 
     /// Create value to session key
