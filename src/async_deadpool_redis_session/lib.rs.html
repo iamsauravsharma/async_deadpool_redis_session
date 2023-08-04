@@ -117,6 +117,46 @@
 <a href="#117" id="117">117</a>
 <a href="#118" id="118">118</a>
 <a href="#119" id="119">119</a>
+<a href="#120" id="120">120</a>
+<a href="#121" id="121">121</a>
+<a href="#122" id="122">122</a>
+<a href="#123" id="123">123</a>
+<a href="#124" id="124">124</a>
+<a href="#125" id="125">125</a>
+<a href="#126" id="126">126</a>
+<a href="#127" id="127">127</a>
+<a href="#128" id="128">128</a>
+<a href="#129" id="129">129</a>
+<a href="#130" id="130">130</a>
+<a href="#131" id="131">131</a>
+<a href="#132" id="132">132</a>
+<a href="#133" id="133">133</a>
+<a href="#134" id="134">134</a>
+<a href="#135" id="135">135</a>
+<a href="#136" id="136">136</a>
+<a href="#137" id="137">137</a>
+<a href="#138" id="138">138</a>
+<a href="#139" id="139">139</a>
+<a href="#140" id="140">140</a>
+<a href="#141" id="141">141</a>
+<a href="#142" id="142">142</a>
+<a href="#143" id="143">143</a>
+<a href="#144" id="144">144</a>
+<a href="#145" id="145">145</a>
+<a href="#146" id="146">146</a>
+<a href="#147" id="147">147</a>
+<a href="#148" id="148">148</a>
+<a href="#149" id="149">149</a>
+<a href="#150" id="150">150</a>
+<a href="#151" id="151">151</a>
+<a href="#152" id="152">152</a>
+<a href="#153" id="153">153</a>
+<a href="#154" id="154">154</a>
+<a href="#155" id="155">155</a>
+<a href="#156" id="156">156</a>
+<a href="#157" id="157">157</a>
+<a href="#158" id="158">158</a>
+<a href="#159" id="159">159</a>
 </pre></div><pre class="rust"><code><span class="attr">#![warn(missing_docs, unreachable_pub, unused_crate_dependencies)]
 #![deny(unsafe_code)]
 #![deny(clippy::all)]
@@ -127,7 +167,18 @@
 
 </span><span class="kw">use </span>async_session::{Session, SessionStore};
 <span class="kw">use </span>deadpool_redis::redis::AsyncCommands;
-<span class="kw">use </span>deadpool_redis::{Connection, Pool, PoolError};
+<span class="kw">use </span>deadpool_redis::{Config, Connection, ConnectionInfo, Pool, PoolError};
+
+<span class="doccomment">/// Error enum
+</span><span class="attr">#[derive(thiserror::Error, Debug)]
+</span><span class="kw">pub enum </span>Error {
+    <span class="doccomment">/// dead pool redis build error
+    </span><span class="attr">#[error(transparent)]
+    </span>DeadpoolBuild(<span class="attr">#[from] </span>deadpool_redis::BuildError),
+    <span class="doccomment">/// dead pool redis config error
+    </span><span class="attr">#[error(transparent)]
+    </span>DeadPoolConfig(<span class="attr">#[from] </span>deadpool_redis::ConfigError),
+}
 
 <span class="doccomment">/// Struct for deadpool pool store
 </span><span class="attr">#[derive(Clone)]
@@ -163,10 +214,39 @@
         }
     }
 
-    <span class="doccomment">/// Set prefix of pool
+    <span class="doccomment">/// Create new deadpool store from url
+    ///
+    /// # Errors
+    /// When session store cannot be created from given url
+    </span><span class="kw">pub fn </span>from_url(url: <span class="kw">impl </span>Into&lt;String&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, Error&gt; {
+        <span class="kw">let </span>pool = Config::from_url(url).builder()<span class="question-mark">?</span>.build()<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(<span class="self">Self </span>{ pool, prefix: <span class="prelude-val">None </span>})
+    }
+
+    <span class="doccomment">/// Create new deadpool store from connection info
+    ///
+    /// # Errors
+    /// When session store cannot be created from given connection info
+    </span><span class="kw">pub fn </span>from_connection_info(connection_info: <span class="kw">impl </span>Into&lt;ConnectionInfo&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, Error&gt; {
+        <span class="kw">let </span>pool = Config::from_connection_info(connection_info)
+            .builder()<span class="question-mark">?
+            </span>.build()<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(<span class="self">Self </span>{ pool, prefix: <span class="prelude-val">None </span>})
+    }
+
+    <span class="doccomment">/// Set prefix of pool takes session store by taking mutable access of
+    /// session store
     </span><span class="kw">pub fn </span>set_prefix(<span class="kw-2">&amp;mut </span><span class="self">self</span>, prefix: <span class="kw">impl </span>Into&lt;String&gt;) {
         <span class="self">self</span>.prefix = <span class="prelude-val">Some</span>(prefix.into());
     }
+
+    <span class="doccomment">/// Set prefix of pool consume redis session store and return new session
+    /// store
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>with_prefix(<span class="kw-2">mut </span><span class="self">self</span>, prefix: <span class="kw">impl </span>Into&lt;String&gt;) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.set_prefix(prefix);
+        <span class="self">self
+    </span>}
 
     <span class="doccomment">/// Create value to session key
     </span><span class="kw">fn </span>key(<span class="kw-2">&amp;</span><span class="self">self</span>, value: <span class="kw">impl </span>AsRef&lt;str&gt;) -&gt; String {

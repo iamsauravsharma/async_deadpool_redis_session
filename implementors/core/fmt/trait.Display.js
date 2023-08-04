@@ -1,0 +1,3 @@
+(function() {var implementors = {
+"async_deadpool_redis_session":[["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/nightly/core/fmt/trait.Display.html\" title=\"trait core::fmt::Display\">Display</a> for <a class=\"enum\" href=\"async_deadpool_redis_session/enum.Error.html\" title=\"enum async_deadpool_redis_session::Error\">Error</a>"]]
+};if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

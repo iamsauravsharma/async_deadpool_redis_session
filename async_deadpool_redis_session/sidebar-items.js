@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["RedisSessionStore"]};
+window.SIDEBAR_ITEMS = {"enum":["Error"],"struct":["RedisSessionStore"]};
