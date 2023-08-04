@@ -15,7 +15,7 @@ Edit Cargo.toml file to add alpha_vantage as dependencies
 
 ```toml
 [dependencies]
-async_deadpool_redis_session = "0.1.0"
+async_deadpool_redis_session = "0.2.0"
 ```
 
 ## Usage
