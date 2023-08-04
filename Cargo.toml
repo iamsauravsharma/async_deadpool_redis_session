@@ -9,6 +9,7 @@ description = "deadpool redis async session"
 license = "MIT"
 readme = "README.MD"
 keywords = ["async_session", "deadpool", "async", "pool", "redis"]
+categories = ["database"]
 
 
 [dependencies]

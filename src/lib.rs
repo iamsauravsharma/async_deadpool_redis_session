@@ -13,6 +13,9 @@ use deadpool_redis::{Config, Connection, ConnectionInfo, Pool, PoolError};
 /// Error enum
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
+    /// error for non alphanumeric or underscore character
+    #[error("only ascii alphanumeric and underscore is supported as prefix")]
+    NonAlphaNumeric,
     /// dead pool redis build error
     #[error(transparent)]
     DeadpoolBuild(#[from] deadpool_redis::BuildError),
@@ -47,14 +50,6 @@ impl RedisSessionStore {
         }
     }
 
-    /// Create new deadpool store with prefix
-    pub fn new_with_prefix(pool: &Pool, prefix: impl Into<String>) -> Self {
-        Self {
-            pool: pool.clone(),
-            prefix: Some(prefix.into()),
-        }
-    }
-
     /// Create new deadpool store from url
     ///
     /// # Errors
@@ -75,26 +70,30 @@ impl RedisSessionStore {
         Ok(Self { pool, prefix: None })
     }
 
-    /// Set prefix of pool takes session store by taking mutable access of
-    /// session store
-    pub fn set_prefix(&mut self, prefix: impl Into<String>) {
-        self.prefix = Some(prefix.into());
-    }
-
     /// Set prefix of pool consume redis session store and return new session
-    /// store
-    #[must_use]
-    pub fn with_prefix(mut self, prefix: impl Into<String>) -> Self {
-        self.set_prefix(prefix);
-        self
+    /// store only alphanumeric or underscore is supported as prefix
+    ///
+    /// # Errors
+    /// When passed prefix consists of non alphanumeric or underscore character
+    pub fn with_prefix(mut self, prefix: impl Into<String>) -> Result<Self, Error> {
+        let prefix = prefix.into();
+        if !prefix
+            .chars()
+            .all(|c| char::is_ascii_alphanumeric(&c) || c == '_')
+        {
+            return Err(Error::NonAlphaNumeric);
+        };
+        self.prefix = Some(prefix);
+        Ok(self)
     }
 
-    /// Create value to session key
+    /// Create value to session key which join
     fn key(&self, value: impl AsRef<str>) -> String {
+        let value = value.as_ref().to_string();
         if let Some(p) = &self.prefix {
-            format!("{p}{}", value.as_ref())
+            format!("{p}/{value}")
         } else {
-            value.as_ref().to_string()
+            value
         }
     }
 
