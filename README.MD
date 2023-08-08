@@ -11,7 +11,7 @@ Rust library built for async session store for deadpool redis
 
 ## Add as dependencies
 
-Edit Cargo.toml file to add alpha_vantage as dependencies
+Edit Cargo.toml file to add async_deadpool_redis_session as dependencies
 
 ```toml
 [dependencies]
@@ -38,7 +38,6 @@ let session = store.load_session(cookie_value).await.unwrap().unwrap();
 assert_eq!(&session.get::<String>("key").unwrap(), "value");
 ```
 
-See docs for detailed example of other functionality
 
 [license_badge]: https://img.shields.io/github/license/iamsauravsharma/async_deadpool_redis_session.svg?style=for-the-badge
 [license_link]: LICENSE
