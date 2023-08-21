@@ -9,8 +9,6 @@
 use async_session::{Session, SessionStore};
 use deadpool_redis::redis::AsyncCommands;
 use deadpool_redis::{Config, Connection, ConnectionInfo, Pool, PoolError};
-// use serde to handle unused_crate_dependencies issue for serde
-use serde as _;
 
 /// Error enum
 #[derive(thiserror::Error, Debug)]
