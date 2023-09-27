@@ -9,6 +9,7 @@
 use async_session::{Session, SessionStore};
 use deadpool_redis::redis::AsyncCommands;
 use deadpool_redis::{Config, Connection, ConnectionInfo, Pool, PoolError};
+pub use {async_session, deadpool_redis};
 
 /// Error enum
 #[derive(thiserror::Error, Debug)]

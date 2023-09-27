@@ -22,8 +22,8 @@ async_deadpool_redis_session = "0.2.0"
 
 ```rust
 use async_deadpool_redis_session::{RedisSessionStore};
-use async_session::{Session, SessionStore};
-use deadpool_redis::{Config, Runtime};
+use async_deadpool_redis_session::async_session::{Session, SessionStore};
+use async_deadpool_redis_session::deadpool_redis::{Config, Runtime};
 
 // pool creation
 let config = Config::from_url("redis://127.0.0.1:6379").unwrap();
