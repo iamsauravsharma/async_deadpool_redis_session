@@ -156,6 +156,7 @@
 <a href="#156" id="156">156</a>
 <a href="#157" id="157">157</a>
 <a href="#158" id="158">158</a>
+<a href="#159" id="159">159</a>
 </pre></div><pre class="rust"><code><span class="attr">#![warn(missing_docs, unreachable_pub, unused_crate_dependencies)]
 #![deny(unsafe_code)]
 #![deny(clippy::all)]
@@ -167,6 +168,7 @@
 </span><span class="kw">use </span>async_session::{Session, SessionStore};
 <span class="kw">use </span>deadpool_redis::redis::AsyncCommands;
 <span class="kw">use </span>deadpool_redis::{Config, Connection, ConnectionInfo, Pool, PoolError};
+<span class="kw">pub use </span>{async_session, deadpool_redis};
 
 <span class="doccomment">/// Error enum
 </span><span class="attr">#[derive(thiserror::Error, Debug)]
