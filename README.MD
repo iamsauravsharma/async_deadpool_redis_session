@@ -15,7 +15,7 @@ Edit Cargo.toml file to add async_deadpool_redis_session as dependencies
 
 ```toml
 [dependencies]
-async_deadpool_redis_session = "0.2.0"
+async_deadpool_redis_session = "0.3.0"
 ```
 
 ## Usage
