@@ -7,8 +7,10 @@
 //! Library which implements async session for deadpool redis pool
 
 use async_session::{Session, SessionStore};
-use deadpool_redis::redis::AsyncCommands;
-use deadpool_redis::{Config, Connection, ConnectionInfo, Pool, PoolError};
+use deadpool_redis::redis::{AsyncCommands, RedisError};
+use deadpool_redis::{
+    BuildError, Config, ConfigError, Connection, ConnectionInfo, Pool, PoolError,
+};
 pub use {async_session, deadpool_redis};
 
 /// Error enum
@@ -19,10 +21,16 @@ pub enum Error {
     NonAlphaNumeric,
     /// dead pool redis build error
     #[error(transparent)]
-    DeadpoolBuild(#[from] deadpool_redis::BuildError),
+    DeadpoolRedisBuildError(#[from] BuildError),
     /// dead pool redis config error
     #[error(transparent)]
-    DeadPoolConfig(#[from] deadpool_redis::ConfigError),
+    DeadPoolRedisConfigError(#[from] ConfigError),
+    /// dead pool redis pool error
+    #[error(transparent)]
+    DeadpoolRedisPoolError(#[from] PoolError),
+    /// dead pool redis redis error
+    #[error(transparent)]
+    DeadpoolRedisRedisError(#[from] RedisError),
 }
 
 /// Struct for deadpool pool store
@@ -101,6 +109,19 @@ impl RedisSessionStore {
     /// Get connection
     async fn connection(&self) -> Result<Connection, PoolError> {
         self.pool.get().await
+    }
+
+    /// returns the number of sessions
+    ///
+    /// # Errors
+    /// When count of keys cannot be determined
+    pub async fn count(&self) -> Result<usize, Error> {
+        let mut conn = self.connection().await?;
+        let key_count = match self.prefix {
+            Some(_) => conn.keys::<_, Vec<String>>(self.key("*")).await?.len(),
+            None => conn.get("DBSIZE").await?,
+        };
+        Ok(key_count)
     }
 }
 
