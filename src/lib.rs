@@ -15,6 +15,7 @@ pub use {async_session, deadpool_redis};
 
 /// Error enum
 #[derive(thiserror::Error, Debug)]
+#[non_exhaustive]
 pub enum Error {
     /// error for non alphanumeric or underscore character
     #[error("only ascii alphanumeric and underscore is supported as prefix")]
